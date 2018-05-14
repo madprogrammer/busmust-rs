@@ -1,0 +1,7 @@
+[package]
+name = "adept2-sys"
+version = "0.1.0"
+authors = ["Dan Glastonbury <dglastonbury@mozilla.com>"]
+build = "build.rs"
+
+[dependencies]

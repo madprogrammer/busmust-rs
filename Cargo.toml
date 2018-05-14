@@ -1,0 +1,2 @@
+[workspace]
+members = ["adept2", "adept2-sys"]

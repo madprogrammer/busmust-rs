@@ -1,0 +1,12 @@
+[package]
+name = "adept2"
+version = "0.1.0"
+authors = ["Dan Glastonbury <dglastonbury@mozilla.com>"]
+
+[dependencies]
+adept2-sys = { path="../adept2-sys" }
+bitflags = "1"
+failure = "0.1"
+
+[dev-dependencies]
+clap = "2"
