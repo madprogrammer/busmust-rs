@@ -12,7 +12,7 @@ keywords = ["digilent", "adept", "fpga"]
 categories = ["api-bindings"]
 
 [dependencies]
-adept2-sys = { path="../adept2-sys" }
+adept2-sys = { path="../adept2-sys", version = "0.1.0" }
 bitflags = "1"
 failure = "0.1"
 
