@@ -1,7 +1,15 @@
 [package]
 name = "adept2"
-version = "0.1.0"
+description = """
+Bindings to Digilent Adept APIs for working with Digilent FPGAs.
+"""
 authors = ["Dan Glastonbury <dglastonbury@mozilla.com>"]
+version = "0.1.0"
+license = "MIT/Apache-2.0"
+repository = "https://github.com/djg/adept2-rs"
+homepage = "https://github.com/djg/adept2-rs"
+keywords = ["digilent", "adept", "fpga"]
+categories = ["api-bindings"]
 
 [dependencies]
 adept2-sys = { path="../adept2-sys" }
