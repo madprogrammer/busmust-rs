@@ -144,7 +144,7 @@ impl Device {
         unsafe {
             cvt_r(ffi::DmgrGetInfo(
                 &self.0 as *const _ as *mut _,
-                ffi::dinfoPDID,
+                ffi::dinfoDCAP,
                 &mut dcap as *mut _ as *mut _,
             ))?;
         }
