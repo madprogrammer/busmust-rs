@@ -1,0 +1,13 @@
+[package]
+name = "busmust-sys"
+description = "Bindings to BusMust USB-CAN APIs"
+authors = ["Dan Glastonbury <dglastonbury@mozilla.com>", "Sergey Anufrienko <serg@anufrienko.net>"]
+version = "0.1.0"
+license = "MIT/Apache-2.0"
+repository = "https://github.com/madprogrammer/busmust-rs"
+
+build = "build.rs"
+
+[dependencies]
+bitfield-struct = "0.3.2"
+bitflags = "1.3.2"
