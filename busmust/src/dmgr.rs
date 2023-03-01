@@ -1,19 +1,25 @@
 use std::ffi::c_void;
-use super::{Error, Result};
+use super::Error;
 use std::{mem, ptr};
+use std::mem::MaybeUninit;
 use std::os::raw::{c_char, c_int};
 use call::cvt_r;
 use ffi::*;
+use anyhow::Result;
+
 
 use util::StringExt;
 
 pub fn desc_from_error(err: &Error) -> String {
     unsafe {
-        let mut desc: [c_char; BM_ERROR_DESC_MAX_SIZE + 1] = mem::zeroed();
-        println!("called desc_from_error");
-        BM_GetErrorText(
-            err.0, desc[..].as_mut_ptr(), desc.len(), 0);
-        String::from_slice(&desc[..])
+        match err {
+            Error::BusmustError(status) => {
+                let mut desc: [c_char; BM_ERROR_DESC_MAX_SIZE + 1] = mem::zeroed();
+                BM_GetErrorText(
+                    *status, desc[..].as_mut_ptr(), desc.len(), 0);
+                String::from_slice(&desc[..])
+            }
+        }
     }
 }
 
@@ -48,7 +54,7 @@ impl Device {
                 self.1 = Some(handle);
                 self.get_notification()
             } else {
-                Err(Error(BMStatus::InvalidOperation).into())
+                Err(Error::BusmustError(BMStatus::InvalidOperation).into())
             }
         }
     }
@@ -176,11 +182,11 @@ impl Device {
     /// Get current CAN status of the opened channel.
     pub fn get_status_info(&self) -> Result<BMCanStatusInfo> {
         unsafe {
-            let mut status_info: BMCanStatusInfo = mem::zeroed();
+            let mut status_info = MaybeUninit::<BMCanStatusInfo>::uninit();
             cvt_r(BM_GetStatus(
                 self.1.expect("not opened"),
-                &mut status_info
-            )).and_then(|_| Ok(status_info))
+                status_info.as_mut_ptr(),
+            )).and_then(|_| Ok(status_info.assume_init()))
         }
     }
 
@@ -392,9 +398,9 @@ impl Device {
     ///
     pub fn read(&self) -> Result<BMData> {
         unsafe {
-            let mut data = mem::zeroed();
-            cvt_r(BM_Read(self.1.expect("not opened"), &mut data))
-                .and_then(|_| Ok(data))
+            let mut data = MaybeUninit::<BMData>::uninit();
+            cvt_r(BM_Read(self.1.expect("not opened"), data.as_mut_ptr()))
+                .and_then(|_| Ok(data.assume_init()))
         }
     }
 
@@ -416,7 +422,6 @@ impl Device {
         unsafe {
             let mut read_messages = n_messages as c_int;
             let mut messages = Vec::<BMData>::with_capacity(n_messages);
-            messages.reserve_exact(n_messages);
 
             cvt_r(BM_ReadMultiple(self.1.expect("not opened"),
                                   messages.as_mut_ptr(),
@@ -439,14 +444,19 @@ impl Device {
     /// ```
     /// let msg = device.read_can_message().unwrap();
     /// ```
-    pub fn read_can_message(&self) -> Result<BMCanMessage> {
+    pub fn read_can_message(&self) -> Result<Option<BMCanMessage>> {
         unsafe {
-            let mut message = mem::zeroed();
-            cvt_r(BM_ReadCanMessage(self.1.expect("not opened"),
-                &mut message,
+            let mut message = MaybeUninit::<BMCanMessage>::uninit();
+            let result = cvt_r(BM_ReadCanMessage(self.1.expect("not opened"),
+                message.as_mut_ptr(),
                 ptr::null_mut(),
                 ptr::null_mut()
-            )).and_then(|_| Ok(message))
+            ));
+            if result.is_ok() {
+                Ok(Some(message.assume_init()))
+            } else {
+                result.map(|_|None)
+            }
         }
     }
 
@@ -468,7 +478,6 @@ impl Device {
         unsafe {
             let mut read_messages = n_messages as c_int;
             let mut messages = Vec::<BMCanMessage>::with_capacity(n_messages);
-            messages.reserve_exact(n_messages);
 
             cvt_r(BM_ReadMultipleCanMessage(self.1.expect("not opened"),
                 messages.as_mut_ptr(),

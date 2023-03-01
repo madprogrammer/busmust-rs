@@ -3,6 +3,7 @@ use std::os::raw::{c_char, c_int, c_ushort, c_void};
 
 #[cfg(target_arch = "x86_64")]
 #[link(name = "bmapi64")]
+#[allow(non_snake_case)]
 extern "C" {
     /// Initialize BM API library, this function shall be called before any other API calls and shall only be called once.
     ///

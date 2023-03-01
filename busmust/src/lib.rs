@@ -1,27 +1,15 @@
 extern crate busmust_sys as ffi;
+extern crate anyhow;
+extern crate thiserror;
 
-#[macro_use]
-extern crate failure;
+use thiserror::Error;
 
 mod call;
 mod util;
-
 pub mod dmgr;
 
-use std::fmt;
-
-#[derive(Debug, Fail)]
-pub struct Error(ffi::BMStatus);
-
-pub type Result<T> = std::result::Result<T, failure::Error>;
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let desc = dmgr::desc_from_error(self);
-        write!(
-            f,
-            "An error occurred with error code {}/({})",
-            self, desc
-        )
-    }
+#[derive(Error, Debug)]
+pub enum Error {
+    #[error("API error: {0}")]
+    BusmustError(ffi::BMStatus)
 }

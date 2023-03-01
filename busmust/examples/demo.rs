@@ -21,30 +21,28 @@ fn main() {
         device.set_bitrate(BMBitrate::builder().bitrate(250).build()).unwrap();
         device.set_can_mode(BMCanMode::InternalLoopback).unwrap();
 
+        for _ in 0..500 {
+            let msg = BMCanMessage::builder()
+                .sid(0x123)
+                .payload(vec![1, 2, 3, 4, 5, 6, 7, 8])
+                .build();
+
+            device.write_can_message(msg, Some(100)).unwrap();
+            device.wait_for_notification(Some(100));
+            device.read_can_message().unwrap().expect("no message");
+        }
+
         let msg = BMCanMessage::builder()
             .sid(0x123)
-            .fdf(true)
-            .brs(true)
             .payload(vec![1, 2, 3, 4, 5, 6, 7, 8])
             .build();
-        device.write_can_message(msg, Some(1000)).unwrap();
-
-        println!("wait for notification: {:?}", device.wait_for_notification(Some(1000)));
-        let read = device.read_can_message().unwrap();
-        println!("read msg: {:?}: {:?}", read.sid(), read.payload());
-
-        let msg = BMCanMessage::builder()
-             .sid(0x123)
-             .payload(vec![1, 2, 3, 4, 5, 6, 7, 8])
-             .build();
 
         let data = BMData::builder()
             .can_message(msg)
             .build();
 
         device.write(data, Some(1000)).unwrap();
-
-        println!("close");
+        device.clear_buffer().unwrap();
         device.close().unwrap();
     }
 

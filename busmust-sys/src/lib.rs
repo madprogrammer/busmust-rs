@@ -1,5 +1,3 @@
-#![allow(non_upper_case_globals, non_snake_case)]
-
 extern crate bitfield_struct;
 
 #[macro_use]
@@ -12,6 +10,7 @@ mod bitrate_builder;
 mod can_message_builder;
 mod data_builder;
 
+use std::fmt;
 pub use types::*;
 pub use api::*;
 
@@ -34,5 +33,11 @@ impl BMCanMessage {
         let ptr = self as *const BMCanMessage as *const u8;
         let len = std::mem::size_of::<BMCanMessage>();
         unsafe { std::slice::from_raw_parts(ptr, len) }.to_vec()
+    }
+}
+
+impl fmt::Display for BMStatus {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
