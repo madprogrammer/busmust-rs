@@ -2,7 +2,7 @@
 name = "busmust"
 description = "Bindings to BusMust USB-CAN APIs"
 authors = ["Dan Glastonbury <dglastonbury@mozilla.com>", "Sergey Anufrienko <serg@anufrienko.net>"]
-version = "0.1.1"
+version = "0.1.2"
 license = "MIT/Apache-2.0"
 repository = "https://github.com/madprogrammer/busmust-rs"
 homepage = "https://github.com/madprogrammer/busmust-rs"
@@ -10,14 +10,12 @@ keywords = ["busmust", "can", "canfd", "isotp"]
 categories = ["api-bindings"]
 
 [dependencies]
-busmust-sys = { path="../busmust-sys", version = "0.1.0" }
+busmust-sys = { path="../busmust-sys", version = "0.1.2" }
 bitflags = "1"
-anyhow = "1.0.69"
-thiserror = "1.0.38"
-clap = "2"
+clap = "4.1.8"
 
 [dev-dependencies]
-clap = "2"
+clap = "4.1.8"
 
 [lib]
 name = "busmust"

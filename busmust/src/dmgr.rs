@@ -1,27 +1,12 @@
-use std::ffi::c_void;
-use super::Error;
+use std::ffi::{c_char, c_void};
+use super::{Error, Result};
 use std::{mem, ptr};
 use std::mem::MaybeUninit;
-use std::os::raw::{c_char, c_int};
+use std::os::raw::c_int;
 use call::cvt_r;
 use ffi::*;
-use anyhow::Result;
-
 
 use util::StringExt;
-
-pub fn desc_from_error(err: &Error) -> String {
-    unsafe {
-        match err {
-            Error::BusmustError(status) => {
-                let mut desc: [c_char; BM_ERROR_DESC_MAX_SIZE + 1] = mem::zeroed();
-                BM_GetErrorText(
-                    *status, desc[..].as_mut_ptr(), desc.len(), 0);
-                String::from_slice(&desc[..])
-            }
-        }
-    }
-}
 
 pub fn initialize() -> Result<()> {
     unsafe {
@@ -35,6 +20,17 @@ pub fn terminate() -> Result<()> {
         cvt_r(BM_UnInit())?;
     }
     Ok(())
+}
+
+pub fn desc_from_error(err: &Error) -> String {
+    unsafe {
+        let mut desc: [c_char; ffi::BM_ERROR_DESC_MAX_SIZE] = mem::zeroed();
+
+        BM_GetErrorText(err.0, desc[..].as_mut_ptr(), BM_ERROR_DESC_MAX_SIZE, 0);
+        let desc = String::from_slice(&desc[..]);
+
+        desc
+    }
 }
 
 pub struct Device (BMChannelInfo, Option<*const c_void>, Option<*const c_void>);
@@ -54,7 +50,7 @@ impl Device {
                 self.1 = Some(handle);
                 self.get_notification()
             } else {
-                Err(Error::BusmustError(BMStatus::InvalidOperation).into())
+                Err(Error(BMStatus::InvalidOperation).into())
             }
         }
     }
@@ -437,7 +433,7 @@ impl Device {
     /// Read CAN message out of the opened channel.
     /// This function is non-blocking, use [Device::wait_for_notification] to wait for a message first.
     ///
-    /// returns: [`Result<BMCanMessage>`]
+    /// returns: [`Result<Option<BMCanMessage>>`]
     ///
     /// # Examples
     ///
@@ -447,16 +443,22 @@ impl Device {
     pub fn read_can_message(&self) -> Result<Option<BMCanMessage>> {
         unsafe {
             let mut message = MaybeUninit::<BMCanMessage>::uninit();
-            let result = cvt_r(BM_ReadCanMessage(self.1.expect("not opened"),
+            cvt_r(BM_ReadCanMessage(self.1.expect("not opened"),
                 message.as_mut_ptr(),
                 ptr::null_mut(),
                 ptr::null_mut()
-            ));
-            if result.is_ok() {
-                Ok(Some(message.assume_init()))
-            } else {
-                result.map(|_|None)
-            }
+            )).map_or_else (
+                |e| match e {
+                    Error(status) => {
+                        if matches!(status, BMStatus::ReceiveBufferEmpty) {
+                            Ok(None)
+                        } else {
+                            Err(Error(status))
+                        }
+                    }
+                },
+                |_| Ok(Some(message.assume_init()))
+            )
         }
     }
 

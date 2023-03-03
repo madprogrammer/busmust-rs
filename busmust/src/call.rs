@@ -1,11 +1,10 @@
-use super::Error;
+use super::{Error, Result};
 use ffi::BMStatus;
-use anyhow::Result;
 
 pub fn cvt_r(r: BMStatus) -> Result<()> {
      if matches!(r, BMStatus::Ok) {
         Ok(())
     } else {
-        Err(Error::BusmustError(r).into())
+        Err(Error(r).into())
     }
 }
