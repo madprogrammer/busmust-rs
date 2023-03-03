@@ -17,3 +17,9 @@ impl fmt::Display for Error {
         write!(f, "error: {:?} ({})", self, desc_from_error(self))
     }
 }
+
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
+}
