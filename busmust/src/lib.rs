@@ -1,25 +1,39 @@
-extern crate busmust_sys as ffi;
+//! Direct USB access to BUSMUST CAN and CAN FD adapters.
+//!
+//! A [`Device`] owns one USB interface and all of its CAN channels. Configure
+//! channels, send validated [`Frame`]s, and receive frames from all channels in
+//! wire order. No vendor SDK, global initialization, or async runtime is needed.
+//!
+//! ```no_run
+//! use busmust::{ChannelConfig, Frame, Id};
+//! use std::time::Duration;
+//!
+//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
+//! let info = busmust::devices()?.next().ok_or("no BUSMUST adapter")?;
+//! let mut device = info.open()?;
+//! device.configure_channel(0, ChannelConfig::default())?;
+//! let frame = Frame::classic(Id::standard(0x123)?, &[1, 2, 3])?;
+//! device.send(0, &frame, Duration::from_secs(1))?;
+//! if let Some(received) = device.receive(Duration::from_secs(1))? {
+//!     println!("channel {}: {:?}", received.channel, received.frame);
+//! }
+//! device.close()?;
+//! # Ok(())
+//! # }
+//! ```
+#![forbid(unsafe_code)]
+#![warn(missing_docs)]
 
-use std::fmt;
-use dmgr::desc_from_error;
+mod config;
+mod device;
+mod error;
+mod filter;
+mod frame;
+mod protocol;
+mod transport;
 
-mod call;
-mod util;
-pub mod dmgr;
-
-#[derive(Debug, Clone)]
-pub struct Error(ffi::BMStatus);
-
-pub type Result<T> = std::result::Result<T, Error>;
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "error: {:?} ({})", self, desc_from_error(self))
-    }
-}
-
-impl std::error::Error for Error {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        None
-    }
-}
+pub use config::{ChannelConfig, FdMode, Mode, Termination};
+pub use device::{devices, CanStatus, Device, DeviceInfo, Generation, OpenOptions};
+pub use error::{Error, Result};
+pub use filter::{Filter, ReceiveFilters};
+pub use frame::{FdOptions, Frame, Id, ReceivedFrame, Timestamp};
