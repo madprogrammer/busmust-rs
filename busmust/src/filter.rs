@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+// Rust adaptation and changes: 2026-10-07. See NOTICE.md for provenance.
+
 use crate::{Error, Frame, Id, Result};
 
 /// An identifier/mask acceptance filter, optionally constrained by frame flags.

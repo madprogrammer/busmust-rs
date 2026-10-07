@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+// Portions derived from bmsocketcan: Copyright (C) 2026 Busmust Tech Co.,Ltd
+// Rust adaptation and changes: 2026-10-07. See NOTICE.md for provenance.
+
 //! Private, endian-explicit BUSMUST wire codec. No C layouts or casts.
 use crate::frame::LENGTHS;
 use crate::{Error, FdOptions, Frame, Id, ReceivedFrame, Result, Timestamp};

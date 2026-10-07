@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+// Rust adaptation and changes: 2026-10-07. See NOTICE.md for provenance.
+
 //! Hardware verification for two directly connected adapters.
 //! Usage: cargo run --example sweep -- SERIAL_A SERIAL_B [CASE_SUBSTRING]
 //! Writes hardware-results.tsv and exits unsuccessfully if any case fails.

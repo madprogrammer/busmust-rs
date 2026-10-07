@@ -2,10 +2,10 @@
 name = "busmust"
 description = "Native Rust driver for BUSMUST USB CAN and CAN FD adapters"
 authors = ["Dan Glastonbury <dglastonbury@mozilla.com>", "Sergey Anufrienko <serg@anufrienko.net>"]
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 rust-version = "1.85"
-license = "MIT OR Apache-2.0"
+license = "GPL-2.0-or-later"
 repository = "https://github.com/madprogrammer/busmust-rs"
 readme = "../README.md"
 documentation = "https://docs.rs/busmust"
